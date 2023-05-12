@@ -27,9 +27,9 @@ def url_access_count(method):
         html_content = method(url)
 
         r.incr(key_count)
-        # r.set(key, html_content, ex=10)
-        # r.expire(key, 10)
-        r.setex(key, timedelta(seconds=10), value=html_content)
+        r.set(key, html_content, ex=10)
+        r.expire(key, 10)
+        # r.setex(key, timedelta(seconds=10), value=html_content)
         return html_content
     return wrapper
 
