@@ -5,16 +5,34 @@ and as a simple cache
 """
 import redis
 import uuid
+from functools import wraps
 from typing import Union, Optional, Callable
 
 
+def count_calls(method: Callable) -> Callable:
+    """
+    A function that counts how many times methods of the Cache class are called
+    """
+    key = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """Wrapper for decorated function"""
+        self._redis.incr(key)
+        return method(self, *args, **kwargs)
+
+    return wrapper
+
+
 class Cache:
+    """A Cache class"""
 
     def __init__(self):
         """Ïnitialises an instance of Cache class"""
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[int, float, str, bytes]) -> str:
         """
         A method that stores the input data in Redis using a random key
