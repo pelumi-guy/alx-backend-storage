@@ -15,7 +15,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
-    def store(self, data : Union[int , float , str , bytes]) -> str:
+    def store(self, data: Union[int, float, str, bytes]) -> str:
         """
         A method that stores the input data in Redis using a random key
         and returns the key.
@@ -27,8 +27,10 @@ class Cache:
 
     def get(self, key: str, fn: Optional[Callable] = None):
         """
-        A method that takes a key string argument and an optional Callable argument named fn.
-        This callable will be used to convert the data back to the desired format.
+        A method that takes a key string argument
+        and an optional Callable argument named fn.
+        This callable will be used to convert
+        the data back to the desired format.
         """
         ret = self._redis.get(key)
         if ret and fn:
@@ -52,7 +54,7 @@ class Cache:
 
         try:
             val = int(ret.decode('utf8'))
-        except:
+        except Exception:
             return 0
 
         return val
