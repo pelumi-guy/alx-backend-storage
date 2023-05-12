@@ -11,7 +11,8 @@ from typing import Union, Optional, Callable
 
 def count_calls(method: Callable) -> Callable:
     """
-    A function that counts how many times methods of the Cache class are called
+    A decorator function that counts how many
+    times methods of the Cache class are called
     """
     key = method.__qualname__
 
@@ -20,6 +21,30 @@ def count_calls(method: Callable) -> Callable:
         """Wrapper for decorated function"""
         self._redis.incr(key)
         return method(self, *args, **kwargs)
+
+    return wrapper
+
+
+def call_history(method: Callable) -> Callable:
+    """
+    A decorator function that will add its input parameters
+    to one list in redis, and store its output into another list.
+    """
+    key_prefix = method.__qualname__
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """Wrapper for decorated function"""
+        inputs_key = f'{key_prefix}:inputs'
+        outputs_key = f'{key_prefix}:outputs'
+
+        inputs = str(args)
+        self._redis.rpush(inputs_key, inputs)
+
+        output = str(method(self, *args, **kwargs))
+        self._redis.rpush(outputs_key, output)
+
+        return output
 
     return wrapper
 
@@ -33,6 +58,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[int, float, str, bytes]) -> str:
         """
         A method that stores the input data in Redis using a random key
