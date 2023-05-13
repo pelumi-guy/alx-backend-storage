@@ -26,8 +26,8 @@ def url_access_count(method):
         # Get new content and update cache
         html_content = method(url)
 
-        r.set(key, html_content, ex=10)
-        r.expire(key, 10)
+        # r.set(key, html_content, ex=10)
+        # r.expire(key, 10)
         r.setex(key, timedelta(seconds=10), value=html_content)
         return html_content
     return wrapper
